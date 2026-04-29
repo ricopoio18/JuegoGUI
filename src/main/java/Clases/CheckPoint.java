@@ -1,27 +1,26 @@
 package Clases;
 
 public class CheckPoint {
-    private String nombre;
-    private int posicionX;
-    private int posicionY;
+    private int nivel;
+    private double posicionX;
+    private double posicionY;
     private boolean activado;
 
-    public CheckPoint(String nombre, int posicionX, int posicionY) {
-        this.nombre = nombre;
+    public CheckPoint(int nivel, double posicionX, double posicionY) {
+        this.nivel = nivel;
         this.posicionX = posicionX;
         this.posicionY = posicionY;
         this.activado = false;
     }
 
-    public String getNombre() {
-        return nombre;
+    public int getNivel() {
+        return nivel;
     }
-
-    public int getPosicionX() {
+    public double getPosicionX() {
         return posicionX;
     }
 
-    public int getPosicionY(){
+    public double getPosicionY(){
         return posicionY;
     }
 

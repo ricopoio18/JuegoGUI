@@ -4,7 +4,10 @@ import Clases.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -14,6 +17,9 @@ public class PruebaCombateFX extends Application {
     private Personaje jugador;
     private Personaje enemigo;
     private Nivel nivel;
+    private MotorCombate motor;
+    private GestorJuego gestor;
+    private boolean esperandoDecision;
 
     boolean espacioPresionado = false;
 
@@ -73,37 +79,107 @@ public class PruebaCombateFX extends Application {
 
         scene.setOnKeyPressed(e -> {
             switch (e.getCode()) {
-                case SPACE:
+                case RIGHT:
                     espacioPresionado = true;
                     break;
             }
         });
 
         scene.setOnKeyReleased(e -> {
-            if (e.getCode().toString().equals("SPACE")) {
+            if (e.getCode().toString().equals("RIGHT")) {
                 espacioPresionado = false;
             }
         });
-// Crea la instancia fuera del Timer
         // Crea la instancia fuera del Timer
-        // --- Dentro de tu método start() ---
+        gestor = new GestorJuego();
+        nivel = gestor.getNivelActual();
+        motor = new MotorCombate(jugador, enemigo, nivel);
 
-        MotorCombate motor = new MotorCombate(jugador, enemigo, nivel);
+        VBox panelGuardar = new VBox(15); // Espaciado de 15px
+        panelGuardar.setStyle("-fx-background-color: rgba(0,0,0,0.8); -fx-padding: 20; -fx-alignment: center; -fx-background-radius: 15;");
+        panelGuardar.setLayoutX(300);
+        panelGuardar.setLayoutY(120);
+        panelGuardar.setPrefWidth(200);
+        panelGuardar.setVisible(false); // Oculto al inicio
+
+        Label textoPregunta = new Label("¿Deseas guardar partida?");
+        textoPregunta.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+
+        Label lblNivel = new Label("NIVEL: " + gestor.getNumeroNivel());
+        lblNivel.setStyle("-fx-text-fill: white; " +
+                "-fx-font-size: 40px; " +
+                "-fx-font-weight: bold; " +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.9), 15, 0, 3, 3);");
+        lblNivel.setLayoutX(340);
+        lblNivel.setLayoutY(20);
+
+        root.getChildren().add(lblNivel);
+
+        Button btnSi = new Button("SÍ");
+        Button btnNo = new Button("NO");
+        btnSi.setMinWidth(100);
+        btnNo.setMinWidth(100);
+        btnSi.setOnAction(e -> {
+            gestor.jugadorGana(jugador, true); // Guardar = true
+            panelGuardar.setVisible(false);
+            esperandoDecision = false;
+            resetearCombate();
+        });
+
+        btnNo.setOnAction(e -> {
+            gestor.jugadorGana(jugador, false); // Guardar = false
+            panelGuardar.setVisible(false);
+            esperandoDecision = false;
+            resetearCombate();
+        });
+        panelGuardar.getChildren().addAll(textoPregunta, btnSi, btnNo);
+        root.getChildren().add(panelGuardar);
+
+        // Contenedor de Victoria Final
+        VBox panelVictoria = new VBox(20);
+        panelVictoria.setStyle("-fx-background-color: rgba(0,0,0,0.85); " +
+                "-fx-border-color: #FFD700; -fx-border-width: 3; " + // Borde dorado
+                "-fx-padding: 30; -fx-alignment: center; -fx-background-radius: 20;");
+        panelVictoria.setLayoutX(250);
+        panelVictoria.setLayoutY(100);
+        panelVictoria.setPrefWidth(300);
+        panelVictoria.setVisible(false);
+
+        Label textoVictoria = new Label("¡Ganaste!");
+        textoVictoria.setStyle("-fx-text-fill: #FFD700; -fx-font-size: 26px; -fx-font-weight: bold;");
+
+        Button btnSalir = new Button("SALIR DEL JUEGO");
+        btnSalir.setStyle("-fx-background-color: #FFD700; -fx-text-fill: black; -fx-font-weight: bold;");
+        btnSalir.setMinWidth(150);
+
+
+        btnSalir.setOnAction(e -> stage.close());
+
+        panelVictoria.getChildren().addAll(textoVictoria, btnSalir);
+        root.getChildren().add(panelVictoria);
+        esperandoDecision = false;
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
+                if (esperandoDecision) return;
+
+                if (gestor.isJuegoTerminado()) {
+                    panelVictoria.setVisible(true);
+                    stop();
+                    return;
+                }
                 // 1. El motor procesa toda la lógica
                 motor.actualizar(espacioPresionado);
-
+                lblNivel.setText("NIVEL: " + gestor.getNumeroNivel());
                 // 2. Sincronizamos las vistas (ImageView) con el modelo (Personaje)
                 jugadorView.setX(jugador.getPosicionX());
-                jugadorView.setY(jugador.getPosicionY()); // <-- IMPORTANTE
+                jugadorView.setY(jugador.getPosicionY());
 
                 enemigoView.setX(enemigo.getPosicionX());
                 enemigoView.setY(enemigo.getPosicionY());
 
-                // 3. Lógica de GIFs (Movimiento constante vs Colisión)
+
                 double distancia = Math.abs(jugador.getPosicionX() - enemigo.getPosicionX());
 
                 if (distancia <= 65 || !motor.isJuegoActivo()) {
@@ -118,8 +194,22 @@ public class PruebaCombateFX extends Application {
 
                 // 4. Detener el timer si el motor dice que el juego acabó
                 if (!motor.isJuegoActivo()) {
-                    stop();
-                    System.out.println("Combate finalizado");
+
+                    if (enemigo.getPosicionX() >= 670 || enemigo.getPosicionX() <= 10) {
+                        // ¡Ganó! Pero antes de procesar el nivel, preguntamos:
+                        esperandoDecision = true;
+                        if (gestor.getNumeroNivel() < 2){
+                            panelGuardar.setVisible(true);
+                        } else {
+                            gestor.jugadorGana(jugador, false);
+                            esperandoDecision = false;
+                        };
+                    } else {
+                        // Si perdió, va directo a la lógica de pérdida (reintento)
+                        gestor.jugadorPierde(jugador);
+                        resetearCombate();
+                    }
+
                 }
             }
         };
@@ -128,7 +218,17 @@ public class PruebaCombateFX extends Application {
         stage.setTitle("Combate de Escarabajos PRO");
         stage.setScene(scene);
         stage.show();
+
     }
+    private void resetearCombate() {
+        if (gestor.isJuegoTerminado()) return;
+
+        jugador.setPosicion(100, 190);
+        enemigo.setPosicion(670, 190);
+        gestor.configurarEnemigo(enemigo);
+        motor = new MotorCombate(jugador, enemigo, gestor.getNivelActual());
+    }
+
 
     public static void main(String[] args) {
         launch();

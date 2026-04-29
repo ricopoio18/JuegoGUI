@@ -13,6 +13,7 @@ public class MotorCombate {
     private long tiempoEspera = 200;
     private long inicioCooldown = 0;
 
+
     public MotorCombate(Personaje jugador, Personaje enemigo, Nivel nivel) {
         this.jugador = jugador;
         this.enemigo = enemigo;
@@ -64,6 +65,7 @@ public class MotorCombate {
         // 4. Verificar fin del juego (Límites del Ring)
         if (nivel.verificarRingOut(jugador, enemigo)) {
             juegoActivo = false;
+
         }
     }
 
