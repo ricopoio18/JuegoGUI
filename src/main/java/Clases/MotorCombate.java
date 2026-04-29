@@ -14,25 +14,9 @@ public class MotorCombate {
         this.nivel = nivel;
     }
 
-    public void iniciar() {
+    public void actualizar() {
 
-        System.out.println("((( INICIA EL COMBATE )))");
-
-        while (juegoActivo) {
-
-            actualizar();
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        System.out.println("))) FIN DEL COMBATE (((");
-    }
-
-    private void actualizar() {
+        if (!juegoActivo) return;
 
         if (!jugadorVivo() || !enemigoVivo()) {
             juegoActivo = false;
@@ -48,14 +32,10 @@ public class MotorCombate {
 
         if (fin) {
             juegoActivo = false;
-            return;
         }
-
-        mostrarEstado();
     }
 
     private void moverEnemigo() {
-
         if (enemigo.getPosicionX() < jugador.getPosicionX()) {
             enemigo.mover("este", 5);
         } else {
@@ -71,11 +51,7 @@ public class MotorCombate {
         return enemigo.getVida() > 0;
     }
 
-    private void mostrarEstado() {
-        System.out.println(
-                jugador.getNombre() + " Posición en x: " + jugador.getPosicionX() +
-                        " | " +
-                        enemigo.getNombre() + " Posicion en x: " + enemigo.getPosicionX()
-        );
+    public boolean isJuegoActivo() {
+        return juegoActivo;
     }
 }
