@@ -70,7 +70,7 @@ public class PruebaCombateFX extends Application {
                 getClass().getResource("/img/enemigo_move.gif").toExternalForm()
         );
         ImageView enemigo = new ImageView(enemigoIdle);
-        enemigo.setX(700);
+        enemigo.setX(660);
         enemigo.setY(180);
         enemigo.setFitWidth(100);
         enemigo.setFitHeight(100);
@@ -99,66 +99,62 @@ public class PruebaCombateFX extends Application {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                // cooldown
+                // 1. GESTIÓN DE COOLDOWN Y EMPUJE (Mantenemos tu lógica funcional)
                 if (enCooldown) {
                     if (System.currentTimeMillis() - inicioCooldown >= tiempoEspera) {
                         enCooldown = false;
                         empujes = 0;
-                        System.out.println("Puedes empujar otra vez");
                     }
                 }
-                boolean empujandoJugador = false;
 
+                boolean empujandoJugador = false;
                 if (espacioPresionado && !enCooldown) {
                     empujandoJugador = true;
                     empujes++;
-
-                    System.out.println("Empuje #" + empujes);
-
                     if (empujes >= MAX_EMPUJES) {
                         enCooldown = true;
                         inicioCooldown = System.currentTimeMillis();
-                        System.out.println("Cansado...");
                     }
                 }
 
-                // Movimiento normal
+                // 2. ANIMACIÓN CONSTANTE DE MOVIMIENTO
+
+                if (velocidadJugador != 0 && jugador.getImage() != jugadorMove) {
+                    jugador.setImage(jugadorMove);
+                }
+
+                if (velocidadEnemigo != 0 && enemigo.getImage() != enemigoMove) {
+                    enemigo.setImage(enemigoMove);
+                }
+
+                // 3. FÍSICA Y DESPLAZAMIENTO
                 jugador.setX(jugador.getX() + velocidadJugador);
                 enemigo.setX(enemigo.getX() + velocidadEnemigo);
 
-                // Distancia entre ellos
                 double distancia = Math.abs(jugador.getX() - enemigo.getX());
 
-                // COLISIÓN
                 if (distancia <= 60) {
-
-                    double fuerzaJugador = 0.0;
+                    double fuerzaJugador = empujandoJugador ? 10.0 : 0.0;
                     double fuerzaEnemigo = 2.5;
 
-                    if (empujandoJugador) {
-                        fuerzaJugador = 10.0;
-                    }
-
                     double centro = (jugador.getX() + enemigo.getX()) / 2;
-
                     jugador.setX(centro - 30);
                     enemigo.setX(centro + 30);
 
                     double empuje = fuerzaJugador - fuerzaEnemigo;
-
                     jugador.setX(jugador.getX() + empuje);
                     enemigo.setX(enemigo.getX() + empuje);
                 }
 
-                // Límites del ring
-                if (jugador.getX() <= 10 || jugador.getX() >= 705) {
+                // 4. LÍMITES Y FIN DEL JUEGO
+                if (jugador.getX() <= 10 || jugador.getX() >= 705 || enemigo.getX() <= 10 || enemigo.getX() >= 705) {
                     stop();
-                    System.out.println("Enemigo gana");
-                }
+                    // Al morir o ganar, podrías poner el GIF de IDLE aquí si quisieras
+                    jugador.setImage(jugadorIdle);
+                    enemigo.setImage(enemigoIdle);
 
-                if (enemigo.getX() <= 10 || enemigo.getX() >= 705) {
-                    stop();
-                    System.out.println("Jugador gana");
+                    if (jugador.getX() <= 10 || jugador.getX() >= 705) System.out.println("Enemigo gana");
+                    else System.out.println("Jugador gana");
                 }
             }
         };
