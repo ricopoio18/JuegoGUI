@@ -6,15 +6,15 @@ import Interfaces.ElementoDinamico;
 public class Personaje implements Destruible, ElementoDinamico {
     private String nombre;
     private int vida;
-    private int posicionX;
-    private int posicionY;
+    private double posicionX;
+    private double posicionY;
     private boolean vivo;
     //Ataques
     private Arma arma;
     private long ultimoAtaque;
     private long tiempoEspera;
 
-    public Personaje(String nombre, int vida, int posicionX, int posicionY, long tiempoEspera) {
+    public Personaje(String nombre, int vida, double posicionX, double posicionY, long tiempoEspera) {
         this.nombre = nombre;
         this.vida = vida;
         this.posicionX = posicionX;
@@ -39,17 +39,21 @@ public class Personaje implements Destruible, ElementoDinamico {
         return vida;
     }
 
-    public int getPosicionX(){
+    public double getPosicionX(){
         return posicionX;
     }
 
-    public int getPosicionY(){
+    public double getPosicionY(){
         return posicionY;
     }
 
-    public void setPosicion(int x, int y){
+    public void setPosicion(double x, double y){
         posicionX = x;
         posicionY = y;
+    }
+
+    public void setPosicionX(double x){
+        posicionX = x;
     }
 
     public void recibirDaño(int daño){
