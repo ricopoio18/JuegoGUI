@@ -29,7 +29,7 @@ public class PruebaCombateFX extends Application {
         Pane root = new Pane();
 
         jugador = new Personaje("Jugador", 100, 100, 180, 200);
-        enemigo = new Personaje("Enemigo", 100, 700, 180, 200);
+        enemigo = new Personaje("Enemigo", 100, 670, 180, 200);
 
         nivel = new Nivel("Ring", 1, "Normal", new Inventario(10));
 
@@ -90,17 +90,17 @@ public class PruebaCombateFX extends Application {
                 espacioPresionado = false;
             }
         });
-        // Crea la instancia fuera del Timer
+
         gestor = new GestorJuego();
         nivel = gestor.getNivelActual();
         motor = new MotorCombate(jugador, enemigo, nivel);
 
-        VBox panelGuardar = new VBox(15); // Espaciado de 15px
+        VBox panelGuardar = new VBox(15);
         panelGuardar.setStyle("-fx-background-color: rgba(0,0,0,0.8); -fx-padding: 20; -fx-alignment: center; -fx-background-radius: 15;");
         panelGuardar.setLayoutX(300);
         panelGuardar.setLayoutY(120);
         panelGuardar.setPrefWidth(200);
-        panelGuardar.setVisible(false); // Oculto al inicio
+        panelGuardar.setVisible(false);
 
         Label textoPregunta = new Label("¿Deseas guardar partida?");
         textoPregunta.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
@@ -120,14 +120,14 @@ public class PruebaCombateFX extends Application {
         btnSi.setMinWidth(100);
         btnNo.setMinWidth(100);
         btnSi.setOnAction(e -> {
-            gestor.jugadorGana(jugador, true); // Guardar = true
+            gestor.jugadorGana(jugador, true);
             panelGuardar.setVisible(false);
             esperandoDecision = false;
             resetearCombate();
         });
 
         btnNo.setOnAction(e -> {
-            gestor.jugadorGana(jugador, false); // Guardar = false
+            gestor.jugadorGana(jugador, false);
             panelGuardar.setVisible(false);
             esperandoDecision = false;
             resetearCombate();
@@ -169,10 +169,9 @@ public class PruebaCombateFX extends Application {
                     stop();
                     return;
                 }
-                // 1. El motor procesa toda la lógica
+
                 motor.actualizar(espacioPresionado);
                 lblNivel.setText("NIVEL: " + gestor.getNumeroNivel());
-                // 2. Sincronizamos las vistas (ImageView) con el modelo (Personaje)
                 jugadorView.setX(jugador.getPosicionX());
                 jugadorView.setY(jugador.getPosicionY());
 
@@ -183,16 +182,15 @@ public class PruebaCombateFX extends Application {
                 double distancia = Math.abs(jugador.getPosicionX() - enemigo.getPosicionX());
 
                 if (distancia <= 65 || !motor.isJuegoActivo()) {
-                    // Si están chocando o el juego terminó, ponemos IDLE
+                    //manejo de estados
                     if (jugadorView.getImage() != jugadorIdle) jugadorView.setImage(jugadorIdle);
                     if (enemigoView.getImage() != enemigoIdle) enemigoView.setImage(enemigoIdle);
                 } else {
-                    // Si están lejos, se están acercando (caminando)
                     if (jugadorView.getImage() != jugadorMove) jugadorView.setImage(jugadorMove);
                     if (enemigoView.getImage() != enemigoMove) enemigoView.setImage(enemigoMove);
                 }
 
-                // 4. Detener el timer si el motor dice que el juego acabó
+                // detiene el timer si el motor dice que el juego acabó
                 if (!motor.isJuegoActivo()) {
 
                     if (enemigo.getPosicionX() >= 670 || enemigo.getPosicionX() <= 10) {
@@ -205,7 +203,7 @@ public class PruebaCombateFX extends Application {
                             esperandoDecision = false;
                         };
                     } else {
-                        // Si perdió, va directo a la lógica de pérdida (reintento)
+
                         gestor.jugadorPierde(jugador);
                         resetearCombate();
                     }
@@ -215,7 +213,7 @@ public class PruebaCombateFX extends Application {
         };
         timer.start();
 
-        stage.setTitle("Combate de Escarabajos PRO");
+        stage.setTitle("Beatle Battles");
         stage.setScene(scene);
         stage.show();
 

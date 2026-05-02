@@ -16,7 +16,7 @@ public class Nivel {
     private Inventario inventario;
     //Limites del ring
     private int limiteIzquierdo = 0;
-    private int limiteDerecho = 800;
+    private int limiteDerecho = 700;
 
     public Nivel(String nombre, int numero, String dificultad,Inventario inventario){
         this.nombre = nombre;

@@ -23,7 +23,7 @@ public class MotorCombate {
     public void actualizar(boolean espacioPresionado) {
         if (!juegoActivo) return;
 
-        // 1. Gestión de Cooldown
+        // gestión del cooldown
         if (enCooldown) {
             if (System.currentTimeMillis() - inicioCooldown >= tiempoEspera) {
                 enCooldown = false;
@@ -41,11 +41,11 @@ public class MotorCombate {
             }
         }
 
-        // 2. Movimiento automático (Avanzan siempre hacia el centro)
+        // Movimiento automático
         jugador.mover("este", 2);
         moverIAEnemigo();
 
-        // 3. Física de Colisión y Empuje
+        // Física de colisión y empuje
         double dist = Math.abs(jugador.getPosicionX() - enemigo.getPosicionX());
         if (dist <= 60) {
             double fuerzaJugador = estaEmpujando ? 10.0 : 0.0;
@@ -62,7 +62,7 @@ public class MotorCombate {
             enemigo.setPosicionX(enemigo.getPosicionX() + resultado);
         }
 
-        // 4. Verificar fin del juego (Límites del Ring)
+        // verifica los límites del ring
         if (nivel.verificarRingOut(jugador, enemigo)) {
             juegoActivo = false;
 
